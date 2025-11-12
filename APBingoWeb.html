@@ -58,14 +58,10 @@
                 alert("Your browser blocked local file access. For automatic loading, use Firefox. Otherwise, please enter the server address manually.");
                 const inputServer = prompt("Enter the Archipelago server address:", "archipelago.gg:38281");
                 if (inputServer) server = inputServer;
-            }
 
-            if (!username) {
                 const inputUser = prompt("Enter your username:", "Player1");
                 if (inputUser) username = inputUser;
-            }
 
-            if (!params.has("password") && !password){
                 const inputPass = prompt("Enter your password (leave blank if none):", "");
                 if (inputPass) password = inputPass;
             }
@@ -113,7 +109,7 @@
             for (let i = 0; i <= connect_packet.slot_data.boardSize; i++) {
                 let td = document.createElement("td");
                 if (i > 0) {
-                    td.innerText = letter + i + (blind?"":  ": " + connect_packet.slot_data.boardLocations[pos++]);
+                    td.innerText = letter + i + (blind ? "" : ": " + connect_packet.slot_data.boardLocations[pos++]);
                     td.classList.add("cell");
 
                 }
