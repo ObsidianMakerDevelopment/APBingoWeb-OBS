@@ -8,9 +8,8 @@ It is designed to send checks to the Archipelago server and has been updated for
 ## 🎯 Usage
 
 ### 1. Running the Bingo Board
-- Unzip the patch and open the `APBingoWeb.html` file in your browser.
-- The board will attempt to load configuration automatically.  
-  - You can provide configuration via **URL parameters** or by editing the HTML directly.
+ - Download `APBingoWeb.html`
+ - You can provide configuration via **URL parameters** or by editing the HTML directly.
 
 ### 2. Configuration Options
 
