@@ -41,10 +41,12 @@
         let server = undefined;
         let password = undefined;
         let username = undefined;
+        let blind = false;
 
         async function loadConfig() {
             // Parse query parameters
             const params = new URLSearchParams(window.location.search);
+            blind = blind || params.has("blind");
 
             // Fallback to query parameters if present
             if (params.has("server")) server = params.get("server");
@@ -111,7 +113,7 @@
             for (let i = 0; i <= connect_packet.slot_data.boardSize; i++) {
                 let td = document.createElement("td");
                 if (i > 0) {
-                    td.innerText = letter + i + ": " + connect_packet.slot_data.boardLocations[pos++];
+                    td.innerText = letter + i + (blind?"":  ": " + connect_packet.slot_data.boardLocations[pos++]);
                     td.classList.add("cell");
 
                 }

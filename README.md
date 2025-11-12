@@ -24,6 +24,7 @@ APBingoWeb.html?server=archipelago.gg:38281&username=Player1&password=
 - `server` → Archipelago server address and port (e.g., `archipelago.gg:60355`)
 - `username` → Your chosen player name
 - `password` → Leave empty if no password is required
+- `blind` → Hide all check hints, even if it was generated with hints
 
 This method is especially useful when embedding the page in **OBS** or when you want to skip interactive prompts.
 
