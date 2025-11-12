@@ -20,7 +20,7 @@ You can pass server configuration directly in the URL:
 APBingoWeb.html?server=archipelago.gg:38281&username=Player1&password=
 ```
 
-- `server` → Archipelago server address and port (e.g., `archipelago.gg:60355`)
+- `server` → Archipelago server address and port (e.g., `archipelago.gg:38281`)
 - `username` → Your chosen player name
 - `password` → Leave empty if no password is required
 - `blind` → Hide all check hints, even if it was generated with hints
