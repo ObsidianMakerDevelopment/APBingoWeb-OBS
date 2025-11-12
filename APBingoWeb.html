@@ -72,7 +72,9 @@
         window.ap_client = ap_client;
         let logData = await ap_client.login(server, username, "APBingo", { password, tags: ["AP"], version: { major: 0, minor: 6, build: 3 }, items: AP.itemsHandlingFlags.all })
         ap_client.logData = logData
-
+        ap_client.socket.on("disconnected", async () => {
+            await ap_client.login(server, username, "APBingo", { password, tags: ["AP"], version: { major: 0, minor: 6, build: 3 }, items: AP.itemsHandlingFlags.all }).catch(console.error)
+        })
         ap_client.items.on("itemsReceived", (items) => {
             setTimeout(() => {
                 refreshGrid();
