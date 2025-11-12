@@ -6,12 +6,7 @@
 </head>
 
 <body>
-    <script>
-        let server = "localhost";
-        let port = 38281;
-        let password = undefined;
-        let username = "OOTBingo"
-    </script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -42,29 +37,55 @@
     <style id="computed"> </style>
     <div id="grid"></div>
     <script type="module">
-        import * as AP from "https://unpkg.com/archipelago.js@1.2.0/dist/index.js";
-        //import * as AP from "./ap.js";
-        let connect_info = {
-            hostname: server, // Replace with the actual AP server hostname.
-            port: port, // Replace with the actual AP server port.
-            game: "APBingo", // Replace with the game name for this player.
-            name: username, // Replace with the player slot name.
-            items_handling: AP.ITEMS_HANDLING_FLAGS.REMOTE_ALL,
-            tags: ["AP"],
-            password: password,
-            version: {
-                major: 0,
-                minor: 5,
-                build: 0
+        // Default config
+        let server = undefined;
+        let password = undefined;
+        let username = undefined;
+
+        async function loadConfig() {
+            // Parse query parameters
+            const params = new URLSearchParams(window.location.search);
+
+            // Fallback to query parameters if present
+            if (params.has("server")) server = params.get("server");
+            if (params.has("username")) username = params.get("username");
+            if (params.has("password")) password = params.get("password");
+
+            // If still missing, prompt interactively
+            if (!server) {
+                alert("Your browser blocked local file access. For automatic loading, use Firefox. Otherwise, please enter the server address manually.");
+                const inputServer = prompt("Enter the Archipelago server address:", "archipelago.gg:38281");
+                if (inputServer) server = inputServer;
             }
-        };
-        let ap_client = new AP.Client();
-        ap_client.addListener(AP.SERVER_PACKET_TYPE.RECEIVED_ITEMS, () => {
+
+            if (!username) {
+                const inputUser = prompt("Enter your username:", "Player1");
+                if (inputUser) username = inputUser;
+            }
+
+            if (!params.has("password") && !password){
+                const inputPass = prompt("Enter your password (leave blank if none):", "");
+                if (inputPass) password = inputPass;
+            }
+        }
+        await loadConfig();
+
+        import * as AP from 'https://cdn.jsdelivr.net/npm/archipelago.js@2.0.4/+esm'
+        const ap_client = new AP.Client();
+        window.ap_client = ap_client;
+        let logData = await ap_client.login(server, username, "APBingo", { password, tags: ["AP"], version: { major: 0, minor: 6, build: 3 }, items: AP.itemsHandlingFlags.all })
+        ap_client.logData = logData
+
+        ap_client.items.on("itemsReceived", (items) => {
             setTimeout(() => {
                 refreshGrid();
             }, 1);
         })
-        let connect_packet = await ap_client.connect(connect_info).catch(console.error);
+        setTimeout(() => {
+            refreshGrid();
+        }, 1);
+
+        let connect_packet = { slot_data: ap_client.logData };
         console.log(connect_packet);
         //Build
         let tab = window.tab = {}
@@ -103,17 +124,15 @@
         }
 
         function refreshGrid() {
-            console.log(ap_client.items.received)
-
 
             document.querySelectorAll("td.cell").forEach(el => {
                 el.classList.remove("completed");
             })
 
             for (let it of ap_client.items.received) {
-                let name = ap_client.items.name(connect_packet.slot, it.item)
-                tab[name].classList.add("completed");
+                tab[it.name].classList.add("completed");
             }
+
             //Validate bingo and send checks
 
             let bingos = {
@@ -133,8 +152,8 @@
                 return name;
             }
 
-            (ap_client.locations.checked.map(id => readBingo(id, ap_client.locations.name(connect_packet.slot, id))));
-            (ap_client.locations.missing.map(id => readBingo(id, ap_client.locations.name(connect_packet.slot, id))));
+            (ap_client.room.checkedLocations.map(id => readBingo(id, ap_client.package.lookupLocationName("APBingo", id))));
+            (ap_client.room.missingLocations.map(id => readBingo(id, ap_client.package.lookupLocationName("APBingo", id))));
 
             Object.values(bingos).forEach(bingo => {
                 //Check this bingo
@@ -162,17 +181,16 @@
 
                     //Send checks for that row
                     if (bingo.completed)
-                        ap_client.locations.check(...bingo.checks);
+                        ap_client.check(...bingo.checks);
                 }
             })
 
             if (Object.values(bingos).filter(x => x.completed).length >= connect_packet.slot_data.requiredBingoCount) {
                 //Trigger goal
-                ap_client.updateStatus(AP.CLIENT_STATUS.GOAL);
+                console.log("Triggering goal");
+                ap_client.check(...ap_client.room.missingLocations) //Bingo(ALL)
+                ap_client.goal();
             }
-
-            console.log(bingos);
-
         }
 
         document.getElementById("computed").innerHTML = ".cell{ color: " + connect_packet.slot_data.customText + "}" +
